@@ -28,7 +28,7 @@ openButton.Position = UDim2.new(0.02, 0, 0.45, 0)
 openButton.Image = "rbxassetid://6034287525" -- ID da imagem do limão
 openButton.BackgroundColor3 = COR_ACENTO
 openButton.BackgroundTransparency = 0
-openButton.Visible = false -- Começa oculto porque o menu abre ativo
+openButton.Visible = false
 
 local cornerOpen = Instance.new("UICorner")
 cornerOpen.CornerRadius = UDim.new(1, 0)
@@ -38,8 +38,8 @@ openButton.Parent = screenGui
 -- Menu Principal (Frame)
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 240, 0, 420)
-mainFrame.Position = UDim2.new(0.5, -120, 0.5, -210)
+mainFrame.Size = UDim2.new(0, 240, 0, 220) -- Tamanho inicial menor sem a lista visível
+mainFrame.Position = UDim2.new(0.5, -120, 0.5, -110)
 mainFrame.BackgroundColor3 = COR_FUNDO
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
@@ -151,9 +151,10 @@ end
 local speedBtn = criarBotao("Speed: OFF")
 local jumpBtn = criarBotao("Jump: OFF")
 local noclipBtn = criarBotao("Noclip: OFF")
+local playerListToggleBtn = criarBotao("Players List: OFF")
 
 -- Estados das Funções
-local speedAtivo, jumpAtivo, noclipAtivo = false, false, false
+local speedAtivo, jumpAtivo, noclipAtivo, listAtiva = false, false, false, false
 
 speedBtn.MouseButton1Click:Connect(function()
 	speedAtivo = not speedAtivo
@@ -176,14 +177,26 @@ end)
 -- 5. LISTA DE JOGADORES E TELEPORTE
 local jogadorSelecionado = nil
 
--- Lista Flutuante (ScrollingFrame)
+-- Container da Seção de Jogadores (escondida por padrão)
+local playerListFrame = Instance.new("Frame")
+playerListFrame.Size = UDim2.new(0, 200, 0, 220)
+playerListFrame.BackgroundTransparency = 1
+playerListFrame.Visible = false
+playerListFrame.Parent = container
+
+local listContainerLayout = Instance.new("UIListLayout")
+listContainerLayout.Parent = playerListFrame
+listContainerLayout.Padding = UDim.new(0, 6)
+listContainerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+-- ScrollingFrame para os jogadores
 local scrollList = Instance.new("ScrollingFrame")
-scrollList.Size = UDim2.new(0, 200, 0, 140)
+scrollList.Size = UDim2.new(0, 200, 0, 130)
 scrollList.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 scrollList.BorderSizePixel = 0
 scrollList.CanvasSize = UDim2.new(0, 0, 0, 0)
 scrollList.ScrollBarThickness = 4
-scrollList.Parent = container
+scrollList.Parent = playerListFrame
 
 local cornerScroll = Instance.new("UICorner")
 cornerScroll.CornerRadius = UDim.new(0, 6)
@@ -236,9 +249,47 @@ local function atualizarLista()
 	scrollList.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y + 10)
 end
 
-local refreshBtn = criarBotao("🔄 Refresh List", 32)
-local tpBtn = criarBotao("⚡ Teleport to Player", 32)
+-- Botões Refresh e Teleport
+local refreshBtn = Instance.new("TextButton")
+refreshBtn.Size = UDim2.new(0, 200, 0, 32)
+refreshBtn.BackgroundColor3 = COR_BOTAO
+refreshBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+refreshBtn.TextSize = 13
+refreshBtn.Font = Enum.Font.Gotham
+refreshBtn.Text = "🔄 Refresh List"
+refreshBtn.Parent = playerListFrame
+
+local cornerRefresh = Instance.new("UICorner")
+cornerRefresh.CornerRadius = UDim.new(0, 8)
+cornerRefresh.Parent = refreshBtn
+
+local tpBtn = Instance.new("TextButton")
+tpBtn.Size = UDim2.new(0, 200, 0, 32)
 tpBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+tpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+tpBtn.TextSize = 13
+tpBtn.Font = Enum.Font.Gotham
+tpBtn.Text = "⚡ Teleport to Player"
+tpBtn.Parent = playerListFrame
+
+local cornerTp = Instance.new("UICorner")
+cornerTp.CornerRadius = UDim.new(0, 8)
+cornerTp.Parent = tpBtn
+
+-- Evento do Botão Toggle para abrir/fechar a lista
+playerListToggleBtn.MouseButton1Click:Connect(function()
+	listAtiva = not listAtiva
+	playerListToggleBtn.Text = listAtiva and "Players List: ON" or "Players List: OFF"
+	playerListToggleBtn.TextColor3 = listAtiva and COR_ACENTO or Color3.fromRGB(255, 255, 255)
+	
+	playerListFrame.Visible = listAtiva
+	if listAtiva then
+		mainFrame.Size = UDim2.new(0, 240, 0, 440)
+		atualizarLista()
+	else
+		mainFrame.Size = UDim2.new(0, 240, 0, 220)
+	end
+end)
 
 refreshBtn.MouseButton1Click:Connect(function()
 	atualizarLista()
@@ -252,9 +303,6 @@ tpBtn.MouseButton1Click:Connect(function()
 		end
 	end
 end)
-
--- Inicializa a lista
-atualizarLista()
 
 -- 6. LOOP CONTINUO DE SPEED E NOCLIP
 RunService.Stepped:Connect(function()
