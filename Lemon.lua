@@ -1,6 +1,6 @@
 --[[ 
-    LEMON HUB - Script para Roblox Studio
-    Menu Flutuante e Móvel com Imagem de Limão
+    LEMON TROLL 🍋 - Script para Roblox Studio
+    Menu Flutuante com ESP Tracers, Torso Skybox e Teleporte por Nome
 ]]
 
 local Players = game:GetService("Players")
@@ -16,7 +16,7 @@ local COR_BOTAO = Color3.fromRGB(45, 45, 45)
 
 -- 1. CRIAÇÃO DA INTERFACE (GUI)
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "LemonHubGui"
+screenGui.Name = "LemonTrollGui"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
@@ -25,7 +25,7 @@ local openButton = Instance.new("ImageButton")
 openButton.Name = "LemonOpenButton"
 openButton.Size = UDim2.new(0, 60, 0, 60)
 openButton.Position = UDim2.new(0.02, 0, 0.45, 0)
-openButton.Image = "rbxassetid://6034287525" -- ID da imagem do limão
+openButton.Image = "rbxassetid://6034287525" -- ID do limão
 openButton.BackgroundColor3 = COR_ACENTO
 openButton.BackgroundTransparency = 0
 openButton.Visible = false
@@ -38,8 +38,8 @@ openButton.Parent = screenGui
 -- Menu Principal (Frame)
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 240, 0, 220) -- Tamanho inicial menor sem a lista visível
-mainFrame.Position = UDim2.new(0.5, -120, 0.5, -110)
+mainFrame.Size = UDim2.new(0, 240, 0, 380)
+mainFrame.Position = UDim2.new(0.5, -120, 0.5, -190)
 mainFrame.BackgroundColor3 = COR_FUNDO
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
@@ -52,7 +52,7 @@ cornerMain.Parent = mainFrame
 -- Título
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 40)
-title.Text = "LEMON HUB 🍋"
+title.Text = "Lemon troll 🍋"
 title.TextColor3 = COR_ACENTO
 title.Font = Enum.Font.GothamBold
 title.TextSize = 18
@@ -90,7 +90,7 @@ layout.Padding = UDim.new(0, 6)
 layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 
--- 2. FUNÇÃO PARA MOVER/ARRASTAR O MENU NA TELA
+-- 2. FUNÇÃO PARA ARRASTAR O MENU
 local dragging, dragInput, dragStart, startPos
 
 mainFrame.InputBegan:Connect(function(input)
@@ -120,7 +120,7 @@ UserInputService.InputChanged:Connect(function(input)
 	end
 end)
 
--- 3. ABRIR E FECHAR MENU
+-- Abrir e Fechar Menu
 closeButton.MouseButton1Click:Connect(function()
 	mainFrame.Visible = false
 	openButton.Visible = true
@@ -131,7 +131,7 @@ openButton.MouseButton1Click:Connect(function()
 	openButton.Visible = false
 end)
 
--- 4. CRIAR BOTÕES DAS FUNÇÕES PRINCIPAIS
+-- 3. CRIAÇÃO DOS BOTÕES E ELEMENTOS
 local function criarBotao(texto, tamanhoY)
 	local btn = Instance.new("TextButton")
 	btn.Size = UDim2.new(0, 200, 0, tamanhoY or 35)
@@ -151,10 +151,32 @@ end
 local speedBtn = criarBotao("Speed: OFF")
 local jumpBtn = criarBotao("Jump: OFF")
 local noclipBtn = criarBotao("Noclip: OFF")
-local playerListToggleBtn = criarBotao("Players List: OFF")
+
+-- Caixa de Texto para Nome do Jogador
+local nameInput = Instance.new("TextBox")
+nameInput.Size = UDim2.new(0, 200, 0, 35)
+nameInput.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+nameInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+nameInput.PlaceholderText = "Nome do Jogador..."
+nameInput.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
+nameInput.Font = Enum.Font.Gotham
+nameInput.TextSize = 13
+nameInput.Text = ""
+nameInput.Parent = container
+
+local cornerInput = Instance.new("UICorner")
+cornerInput.CornerRadius = UDim.new(0, 8)
+cornerInput.Parent = nameInput
+
+local tpBtn = criarBotao("⚡ Teleport to Player", 35)
+tpBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+
+local espBtn = criarBotao("ESP Tracers: OFF")
+local torsoSkyBtn = criarBotao("Torso Skybox: OFF")
 
 -- Estados das Funções
-local speedAtivo, jumpAtivo, noclipAtivo, listAtiva = false, false, false, false
+local speedAtivo, jumpAtivo, noclipAtivo = false, false, false
+local espAtivo, torsoSkyAtivo = false, false
 
 speedBtn.MouseButton1Click:Connect(function()
 	speedAtivo = not speedAtivo
@@ -174,137 +196,140 @@ noclipBtn.MouseButton1Click:Connect(function()
 	noclipBtn.TextColor3 = noclipAtivo and COR_ACENTO or Color3.fromRGB(255, 255, 255)
 end)
 
--- 5. LISTA DE JOGADORES E TELEPORTE
-local jogadorSelecionado = nil
+espBtn.MouseButton1Click:Connect(function()
+	espAtivo = not espAtivo
+	espBtn.Text = espAtivo and "ESP Tracers: ON" or "ESP Tracers: OFF"
+	espBtn.TextColor3 = espAtivo and COR_ACENTO or Color3.fromRGB(255, 255, 255)
+end)
 
--- Container da Seção de Jogadores (escondida por padrão)
-local playerListFrame = Instance.new("Frame")
-playerListFrame.Size = UDim2.new(0, 200, 0, 220)
-playerListFrame.BackgroundTransparency = 1
-playerListFrame.Visible = false
-playerListFrame.Parent = container
+torsoSkyBtn.MouseButton1Click:Connect(function()
+	torsoSkyAtivo = not torsoSkyAtivo
+	torsoSkyBtn.Text = torsoSkyAtivo and "Torso Skybox: ON" or "Torso Skybox: OFF"
+	torsoSkyBtn.TextColor3 = torsoSkyAtivo and COR_ACENTO or Color3.fromRGB(255, 255, 255)
+end)
 
-local listContainerLayout = Instance.new("UIListLayout")
-listContainerLayout.Parent = playerListFrame
-listContainerLayout.Padding = UDim.new(0, 6)
-listContainerLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-
--- ScrollingFrame para os jogadores
-local scrollList = Instance.new("ScrollingFrame")
-scrollList.Size = UDim2.new(0, 200, 0, 130)
-scrollList.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-scrollList.BorderSizePixel = 0
-scrollList.CanvasSize = UDim2.new(0, 0, 0, 0)
-scrollList.ScrollBarThickness = 4
-scrollList.Parent = playerListFrame
-
-local cornerScroll = Instance.new("UICorner")
-cornerScroll.CornerRadius = UDim.new(0, 6)
-cornerScroll.Parent = scrollList
-
-local listLayout = Instance.new("UIListLayout")
-listLayout.Parent = scrollList
-listLayout.Padding = UDim.new(0, 4)
-listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-listLayout.SortOrder = Enum.SortOrder.Name
-
-local function atualizarLista()
-	for _, child in pairs(scrollList:GetChildren()) do
-		if child:IsA("TextButton") then
-			child:Destroy()
-		end
-	end
+-- 4. TELEPORTE POR CAIXA DE TEXTO
+tpBtn.MouseButton1Click:Connect(function()
+	local text = string.lower(nameInput.Text)
+	if text == "" then return end
 	
-	jogadorSelecionado = nil
-
 	for _, targetPlayer in pairs(Players:GetPlayers()) do
 		if targetPlayer ~= player then
-			local btnPlr = Instance.new("TextButton")
-			btnPlr.Size = UDim2.new(0, 180, 0, 28)
-			btnPlr.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-			btnPlr.TextColor3 = Color3.fromRGB(255, 255, 255)
-			btnPlr.Font = Enum.Font.Gotham
-			btnPlr.TextSize = 12
-			btnPlr.Text = targetPlayer.DisplayName .. " (@" .. targetPlayer.Name .. ")"
-			btnPlr.Parent = scrollList
-
-			local cornerBtn = Instance.new("UICorner")
-			cornerBtn.CornerRadius = UDim.new(0, 4)
-			cornerBtn.Parent = btnPlr
-
-			btnPlr.MouseButton1Click:Connect(function()
-				for _, other in pairs(scrollList:GetChildren()) do
-					if other:IsA("TextButton") then
-						other.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-						other.TextColor3 = Color3.fromRGB(255, 255, 255)
+			local name = string.lower(targetPlayer.Name)
+			local displayName = string.lower(targetPlayer.DisplayName)
+			
+			if string.find(name, text) or string.find(displayName, text) then
+				if targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+					local myChar = player.Character
+					if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+						myChar.HumanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -3)
 					end
 				end
-				jogadorSelecionado = targetPlayer
-				btnPlr.BackgroundColor3 = COR_ACENTO
-				btnPlr.TextColor3 = Color3.fromRGB(0, 0, 0)
-			end)
+				break
+			end
 		end
 	end
+end)
 
-	scrollList.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y + 10)
+-- 5. LÓGICA DE ESP, TRACERS E TORSO SKYBOX
+local highlights = {}
+local beams = {}
+
+local function limparESP()
+	for _, hl in pairs(highlights) do if hl then hl:Destroy() end end
+	for _, data in pairs(beams) do 
+		if data.a0 then data.a0:Destroy() end
+		if data.a1 then data.a1:Destroy() end
+		if data.beam then data.beam:Destroy() end 
+	end
+	highlights = {}
+	beams = {}
 end
 
--- Botões Refresh e Teleport
-local refreshBtn = Instance.new("TextButton")
-refreshBtn.Size = UDim2.new(0, 200, 0, 32)
-refreshBtn.BackgroundColor3 = COR_BOTAO
-refreshBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-refreshBtn.TextSize = 13
-refreshBtn.Font = Enum.Font.Gotham
-refreshBtn.Text = "🔄 Refresh List"
-refreshBtn.Parent = playerListFrame
-
-local cornerRefresh = Instance.new("UICorner")
-cornerRefresh.CornerRadius = UDim.new(0, 8)
-cornerRefresh.Parent = refreshBtn
-
-local tpBtn = Instance.new("TextButton")
-tpBtn.Size = UDim2.new(0, 200, 0, 32)
-tpBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-tpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-tpBtn.TextSize = 13
-tpBtn.Font = Enum.Font.Gotham
-tpBtn.Text = "⚡ Teleport to Player"
-tpBtn.Parent = playerListFrame
-
-local cornerTp = Instance.new("UICorner")
-cornerTp.CornerRadius = UDim.new(0, 8)
-cornerTp.Parent = tpBtn
-
--- Evento do Botão Toggle para abrir/fechar a lista
-playerListToggleBtn.MouseButton1Click:Connect(function()
-	listAtiva = not listAtiva
-	playerListToggleBtn.Text = listAtiva and "Players List: ON" or "Players List: OFF"
-	playerListToggleBtn.TextColor3 = listAtiva and COR_ACENTO or Color3.fromRGB(255, 255, 255)
+RunService.RenderStepped:Connect(function()
+	local char = player.Character
 	
-	playerListFrame.Visible = listAtiva
-	if listAtiva then
-		mainFrame.Size = UDim2.new(0, 240, 0, 440)
-		atualizarLista()
-	else
-		mainFrame.Size = UDim2.new(0, 240, 0, 220)
+	-- Speed
+	if char then
+		local hum = char:FindFirstChildOfClass("Humanoid")
+		if hum then hum.WalkSpeed = speedAtivo and 100 or 16 end
 	end
-end)
-
-refreshBtn.MouseButton1Click:Connect(function()
-	atualizarLista()
-end)
-
-tpBtn.MouseButton1Click:Connect(function()
-	if jogadorSelecionado and jogadorSelecionado.Character and jogadorSelecionado.Character:FindFirstChild("HumanoidRootPart") then
-		local myChar = player.Character
-		if myChar and myChar:FindFirstChild("HumanoidRootPart") then
-			myChar.HumanoidRootPart.CFrame = jogadorSelecionado.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -3)
+	
+	-- ESP & Tracers
+	if espAtivo then
+		for _, target in pairs(Players:GetPlayers()) do
+			if target ~= player and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+				local tChar = target.Character
+				
+				-- Destaque/Silhouette
+				if not tChar:FindFirstChild("LemonESP") then
+					local hl = Instance.new("Highlight")
+					hl.Name = "LemonESP"
+					hl.FillColor = COR_ACENTO
+					hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+					hl.FillTransparency = 0.5
+					hl.Parent = tChar
+					table.insert(highlights, hl)
+				end
+				
+				-- Linha Tracer
+				if char and char:FindFirstChild("HumanoidRootPart") and not tChar:FindFirstChild("LemonTracer") then
+					local a0 = Instance.new("Attachment", char.HumanoidRootPart)
+					local a1 = Instance.new("Attachment", tChar.HumanoidRootPart)
+					local beam = Instance.new("Beam")
+					beam.Name = "LemonTracer"
+					beam.Attachment0 = a0
+					beam.Attachment1 = a1
+					beam.Color = ColorSequence.new(COR_ACENTO)
+					beam.Width0 = 0.15
+					beam.Width1 = 0.15
+					beam.FaceCamera = true
+					beam.Parent = tChar
+					table.insert(beams, {beam = beam, a0 = a0, a1 = a1})
+				end
+			end
+		end
+	else
+		if #highlights > 0 or #beams > 0 then
+			limparESP()
+		end
+	end
+	
+	-- Torso Skybox
+	if char then
+		local torso = char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
+		if torso then
+			local skyTag = torso:FindFirstChild("LemonSkybox")
+			if torsoSkyAtivo then
+				if not skyTag then
+					skyTag = Instance.new("Folder")
+					skyTag.Name = "LemonSkybox"
+					skyTag.Parent = torso
+					
+					local faces = Enum.NormalId:GetEnumItems()
+					for _, face in pairs(faces) do
+						local decal = Instance.new("Decal")
+						decal.Name = "SkyDecal"
+						decal.Face = face
+						decal.Texture = "rbxassetid://15933990" -- Id da textura de céu/espaço
+						decal.Parent = torso
+					end
+				end
+			else
+				if skyTag then
+					skyTag:Destroy()
+					for _, child in pairs(torso:GetChildren()) do
+						if child.Name == "SkyDecal" then
+							child:Destroy()
+						end
+					end
+				end
+			end
 		end
 	end
 end)
 
--- 6. LOOP CONTINUO DE SPEED E NOCLIP
+-- Noclip
 RunService.Stepped:Connect(function()
 	if noclipAtivo and player.Character then
 		for _, part in pairs(player.Character:GetDescendants()) do
@@ -312,16 +337,6 @@ RunService.Stepped:Connect(function()
 				part.CanCollide = false
 			end
 		end
-	end
-end)
-
-RunService.RenderStepped:Connect(function()
-	local char = player.Character
-	if not char then return end
-	
-	local hum = char:FindFirstChildOfClass("Humanoid")
-	if hum then
-		hum.WalkSpeed = speedAtivo and 100 or 16
 	end
 end)
 
