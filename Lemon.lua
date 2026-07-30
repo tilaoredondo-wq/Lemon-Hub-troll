@@ -172,7 +172,6 @@ local tpBtn = criarBotao("⚡ Teleport to Player", 35)
 tpBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
 
 local espBtn = criarBotao("ESP Tracers: OFF")
-local aimbotBtn = criarBotao("Aimbot: OFF")
 local torsoSkyBtn = criarBotao("Torso Skybox: OFF")
 
 -- Estados das Funções
@@ -201,12 +200,6 @@ espBtn.MouseButton1Click:Connect(function()
 	espAtivo = not espAtivo
 	espBtn.Text = espAtivo and "ESP Tracers: ON" or "ESP Tracers: OFF"
 	espBtn.TextColor3 = espAtivo and COR_ACENTO or Color3.fromRGB(255, 255, 255)
-end)
-
-aimbotBtn.MouseButton1Click:Connect(function()
-	aimbotAtivo = not aimbotAtivo
-	aimbotBtn.Text = aimbotAtivo and "Aimbot: ON" or "Aimbot: OFF"
-	aimbotBtn.TextColor3 = aimbotAtivo and COR_ACENTO or Color3.fromRGB(255, 255, 255)
 end)
 
 torsoSkyBtn.MouseButton1Click:Connect(function()
