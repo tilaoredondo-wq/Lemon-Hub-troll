@@ -1,6 +1,6 @@
 --[[ 
     LEMON TROLL 🍋 - Script para Roblox Studio
-    Menu Flutuante com ESP Tracers (com Nome), Torso Skybox e Teleporte
+    Menu Flutuante com ESP Tracers, Aimbot, Torso Skybox e Teleporte
 ]]
 
 local Players = game:GetService("Players")
@@ -38,8 +38,8 @@ openButton.Parent = screenGui
 -- Menu Principal (Frame)
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 240, 0, 380)
-mainFrame.Position = UDim2.new(0.5, -120, 0.5, -190)
+mainFrame.Size = UDim2.new(0, 240, 0, 420) -- Aumentado levemente para acomodar o Aimbot
+mainFrame.Position = UDim2.new(0.5, -120, 0.5, -210)
 mainFrame.BackgroundColor3 = COR_FUNDO
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
@@ -172,11 +172,12 @@ local tpBtn = criarBotao("⚡ Teleport to Player", 35)
 tpBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
 
 local espBtn = criarBotao("ESP Tracers: OFF")
+local aimbotBtn = criarBotao("Aimbot: OFF")
 local torsoSkyBtn = criarBotao("Torso Skybox: OFF")
 
 -- Estados das Funções
 local speedAtivo, jumpAtivo, noclipAtivo = false, false, false
-local espAtivo, torsoSkyAtivo = false, false
+local espAtivo, aimbotAtivo, torsoSkyAtivo = false, false, false
 
 speedBtn.MouseButton1Click:Connect(function()
 	speedAtivo = not speedAtivo
@@ -200,6 +201,12 @@ espBtn.MouseButton1Click:Connect(function()
 	espAtivo = not espAtivo
 	espBtn.Text = espAtivo and "ESP Tracers: ON" or "ESP Tracers: OFF"
 	espBtn.TextColor3 = espAtivo and COR_ACENTO or Color3.fromRGB(255, 255, 255)
+end)
+
+aimbotBtn.MouseButton1Click:Connect(function()
+	aimbotAtivo = not aimbotAtivo
+	aimbotBtn.Text = aimbotAtivo and "Aimbot: ON" or "Aimbot: OFF"
+	aimbotBtn.TextColor3 = aimbotAtivo and COR_ACENTO or Color3.fromRGB(255, 255, 255)
 end)
 
 torsoSkyBtn.MouseButton1Click:Connect(function()
@@ -231,7 +238,35 @@ tpBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
--- 5. LÓGICA DE ESP, TRACERS, NOMES E TORSO SKYBOX
+-- 5. FUNÇÃO AUXILIAR AIMBOT (Busca o Torso mais próximo)
+local function getClosestTorso()
+	local closestTorso = nil
+	local shortestDistance = math.huge
+	local camera = workspace.CurrentCamera
+
+	for _, target in pairs(Players:GetPlayers()) do
+		if target ~= player and target.Character then
+			local torso = target.Character:FindFirstChild("Torso") or target.Character:FindFirstChild("UpperTorso")
+			local hum = target.Character:FindFirstChildOfClass("Humanoid")
+			
+			if torso and hum and hum.Health > 0 then
+				local screenPos, onScreen = camera:WorldToViewportPoint(torso.Position)
+				if onScreen then
+					local mousePos = UserInputService:GetMouseLocation()
+					local distance = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+					
+					if distance < shortestDistance then
+						shortestDistance = distance
+						closestTorso = torso
+					end
+				end
+			end
+		end
+	end
+	return closestTorso
+end
+
+-- 6. LÓGICA DE ESP, TRACERS, AIMBOT E TORSO SKYBOX
 local highlights = {}
 local nameGuis = {}
 local beams = {}
@@ -256,6 +291,14 @@ RunService.RenderStepped:Connect(function()
 	if char then
 		local hum = char:FindFirstChildOfClass("Humanoid")
 		if hum then hum.WalkSpeed = speedAtivo and 100 or 16 end
+	end
+	
+	-- Aimbot
+	if aimbotAtivo then
+		local targetTorso = getClosestTorso()
+		if targetTorso then
+			workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, targetTorso.Position)
+		end
 	end
 	
 	-- ESP, Tracers & Nomes
