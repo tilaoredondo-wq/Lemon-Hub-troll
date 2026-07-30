@@ -1,6 +1,6 @@
 --[[ 
     LEMON TROLL 🍋 - Script para Roblox Studio
-    Menu Flutuante com ESP Tracers, Torso Skybox e Teleporte por Nome
+    Menu Flutuante com ESP Tracers (com Nome), Torso Skybox e Teleporte
 ]]
 
 local Players = game:GetService("Players")
@@ -231,18 +231,21 @@ tpBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
--- 5. LÓGICA DE ESP, TRACERS E TORSO SKYBOX
+-- 5. LÓGICA DE ESP, TRACERS, NOMES E TORSO SKYBOX
 local highlights = {}
+local nameGuis = {}
 local beams = {}
 
 local function limparESP()
 	for _, hl in pairs(highlights) do if hl then hl:Destroy() end end
+	for _, gui in pairs(nameGuis) do if gui then gui:Destroy() end end
 	for _, data in pairs(beams) do 
 		if data.a0 then data.a0:Destroy() end
 		if data.a1 then data.a1:Destroy() end
 		if data.beam then data.beam:Destroy() end 
 	end
 	highlights = {}
+	nameGuis = {}
 	beams = {}
 end
 
@@ -255,11 +258,12 @@ RunService.RenderStepped:Connect(function()
 		if hum then hum.WalkSpeed = speedAtivo and 100 or 16 end
 	end
 	
-	-- ESP & Tracers
+	-- ESP, Tracers & Nomes
 	if espAtivo then
 		for _, target in pairs(Players:GetPlayers()) do
 			if target ~= player and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
 				local tChar = target.Character
+				local head = tChar:FindFirstChild("Head")
 				
 				-- Destaque/Silhouette
 				if not tChar:FindFirstChild("LemonESP") then
@@ -270,6 +274,30 @@ RunService.RenderStepped:Connect(function()
 					hl.FillTransparency = 0.5
 					hl.Parent = tChar
 					table.insert(highlights, hl)
+				end
+				
+				-- Nome DisplayName acima da cabeça
+				if head and not head:FindFirstChild("LemonNameGui") then
+					local bbGui = Instance.new("BillboardGui")
+					bbGui.Name = "LemonNameGui"
+					bbGui.Adornee = head
+					bbGui.Size = UDim2.new(0, 200, 0, 50)
+					bbGui.StudsOffset = Vector3.new(0, 2.5, 0)
+					bbGui.AlwaysOnTop = true
+					
+					local nameLbl = Instance.new("TextLabel")
+					nameLbl.Size = UDim2.new(1, 0, 1, 0)
+					nameLbl.BackgroundTransparency = 1
+					nameLbl.Text = target.DisplayName
+					nameLbl.TextColor3 = COR_ACENTO
+					nameLbl.TextStrokeTransparency = 0
+					nameLbl.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+					nameLbl.Font = Enum.Font.GothamBold
+					nameLbl.TextSize = 14
+					nameLbl.Parent = bbGui
+					
+					bbGui.Parent = head
+					table.insert(nameGuis, bbGui)
 				end
 				
 				-- Linha Tracer
@@ -290,7 +318,7 @@ RunService.RenderStepped:Connect(function()
 			end
 		end
 	else
-		if #highlights > 0 or #beams > 0 then
+		if #highlights > 0 or #beams > 0 or #nameGuis > 0 then
 			limparESP()
 		end
 	end
