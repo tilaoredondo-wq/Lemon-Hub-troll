@@ -1,11 +1,12 @@
 --[[ 
     LEMON TROLL 🍋 - Script para Roblox Studio
-    Menu Flutuante com ESP Tracers, Aimbot, Torso Skybox e Teleporte
+    Menu Flutuante com ESP Tracers, F3X Tools, Torso Skybox e Teleporte
 ]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local InsertService = game:GetService("InsertService")
 
 local player = Players.LocalPlayer
 
@@ -38,7 +39,7 @@ openButton.Parent = screenGui
 -- Menu Principal (Frame)
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 240, 0, 420) -- Aumentado levemente para acomodar o Aimbot
+mainFrame.Size = UDim2.new(0, 240, 0, 420)
 mainFrame.Position = UDim2.new(0.5, -120, 0.5, -210)
 mainFrame.BackgroundColor3 = COR_FUNDO
 mainFrame.BorderSizePixel = 0
@@ -171,12 +172,15 @@ cornerInput.Parent = nameInput
 local tpBtn = criarBotao("⚡ Teleport to Player", 35)
 tpBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
 
+local f3xBtn = criarBotao("🛠️ Get F3X", 35)
+f3xBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 75)
+
 local espBtn = criarBotao("ESP Tracers: OFF")
 local torsoSkyBtn = criarBotao("Torso Skybox: OFF")
 
 -- Estados das Funções
 local speedAtivo, jumpAtivo, noclipAtivo = false, false, false
-local espAtivo, aimbotAtivo, torsoSkyAtivo = false, false, false
+local espAtivo, torsoSkyAtivo = false, false
 
 speedBtn.MouseButton1Click:Connect(function()
 	speedAtivo = not speedAtivo
@@ -231,35 +235,37 @@ tpBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
--- 5. FUNÇÃO AUXILIAR AIMBOT (Busca o Torso mais próximo)
-local function getClosestTorso()
-	local closestTorso = nil
-	local shortestDistance = math.huge
-	local camera = workspace.CurrentCamera
-
-	for _, target in pairs(Players:GetPlayers()) do
-		if target ~= player and target.Character then
-			local torso = target.Character:FindFirstChild("Torso") or target.Character:FindFirstChild("UpperTorso")
-			local hum = target.Character:FindFirstChildOfClass("Humanoid")
-			
-			if torso and hum and hum.Health > 0 then
-				local screenPos, onScreen = camera:WorldToViewportPoint(torso.Position)
-				if onScreen then
-					local mousePos = UserInputService:GetMouseLocation()
-					local distance = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-					
-					if distance < shortestDistance then
-						shortestDistance = distance
-						closestTorso = torso
-					end
+-- 5. FUNÇÃO PARA OBTER A FERRAMENTA F3X
+f3xBtn.MouseButton1Click:Connect(function()
+	local backpack = player:FindFirstChildOfClass("Backpack")
+	if backpack then
+		-- Carrega a ferramenta oficial F3X da biblioteca do Roblox (Asset ID: 142786007)
+		local success, result = pcall(function()
+			return InsertService:LoadAsset(142786007)
+		end)
+		
+		if success and result then
+			local tool = result:FindFirstChildOfClass("Tool")
+			if tool then
+				tool.Parent = backpack
+			else
+				for _, item in pairs(result:GetChildren()) do
+					item.Parent = backpack
 				end
 			end
+		else
+			-- Fallback alternativo via GetObjects caso LoadAsset falhe
+			pcall(function()
+				local objects = game:GetObjects("rbxassetid://142786007")
+				if objects and #objects > 0 then
+					objects[1].Parent = backpack
+				end
+			end)
 		end
 	end
-	return closestTorso
-end
+end)
 
--- 6. LÓGICA DE ESP, TRACERS, AIMBOT E TORSO SKYBOX
+-- 6. LÓGICA DE ESP, TRACERS E TORSO SKYBOX
 local highlights = {}
 local nameGuis = {}
 local beams = {}
@@ -284,14 +290,6 @@ RunService.RenderStepped:Connect(function()
 	if char then
 		local hum = char:FindFirstChildOfClass("Humanoid")
 		if hum then hum.WalkSpeed = speedAtivo and 100 or 16 end
-	end
-	
-	-- Aimbot
-	if aimbotAtivo then
-		local targetTorso = getClosestTorso()
-		if targetTorso then
-			workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, targetTorso.Position)
-		end
 	end
 	
 	-- ESP, Tracers & Nomes
@@ -375,7 +373,7 @@ RunService.RenderStepped:Connect(function()
 						local decal = Instance.new("Decal")
 						decal.Name = "SkyDecal"
 						decal.Face = face
-						decal.Texture = "rbxassetid://15933990" -- Id da textura de céu/espaço
+						decal.Texture = "rbxassetid://15933990"
 						decal.Parent = torso
 					end
 				end
