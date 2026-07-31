@@ -1,12 +1,11 @@
 --[[ 
     LEMON TROLL 🍋 - Script para Roblox Studio
-    Menu Flutuante com ESP Tracers, F3X Tools, Torso Skybox e Teleporte
+    Menu Flutuante com ESP Tracers, Lista de Ferramentas, Torso Skybox e Teleporte
 ]]
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local InsertService = game:GetService("InsertService")
 
 local player = Players.LocalPlayer
 
@@ -39,8 +38,8 @@ openButton.Parent = screenGui
 -- Menu Principal (Frame)
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 240, 0, 420)
-mainFrame.Position = UDim2.new(0.5, -120, 0.5, -210)
+mainFrame.Size = UDim2.new(0, 240, 0, 520)
+mainFrame.Position = UDim2.new(0.5, -120, 0.5, -260)
 mainFrame.BackgroundColor3 = COR_FUNDO
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
@@ -172,11 +171,87 @@ cornerInput.Parent = nameInput
 local tpBtn = criarBotao("⚡ Teleport to Player", 35)
 tpBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
 
-local f3xBtn = criarBotao("🛠️ Get F3X", 35)
-f3xBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 75)
+-- 4. LISTA DE FERRAMENTAS DO JOGO
+local selectedTool = nil
+
+local toolScrollList = Instance.new("ScrollingFrame")
+toolScrollList.Size = UDim2.new(0, 200, 0, 100)
+toolScrollList.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+toolScrollList.BorderSizePixel = 0
+toolScrollList.CanvasSize = UDim2.new(0, 0, 0, 0)
+toolScrollList.ScrollBarThickness = 4
+toolScrollList.Parent = container
+
+local cornerToolScroll = Instance.new("UICorner")
+cornerToolScroll.CornerRadius = UDim.new(0, 6)
+cornerToolScroll.Parent = toolScrollList
+
+local toolListLayout = Instance.new("UIListLayout")
+toolListLayout.Parent = toolScrollList
+toolListLayout.Padding = UDim.new(0, 4)
+toolListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+toolListLayout.SortOrder = Enum.SortOrder.Name
+
+local getToolBtn = criarBotao("🎒 Get Selected Tool", 32)
+getToolBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 75)
 
 local espBtn = criarBotao("ESP Tracers: OFF")
 local torsoSkyBtn = criarBotao("Torso Skybox: OFF")
+
+-- Atualizar lista de ferramentas disponíveis
+local function atualizarListaFerramentas()
+	for _, child in pairs(toolScrollList:GetChildren()) do
+		if child:IsA("TextButton") then
+			child:Destroy()
+		end
+	end
+	
+	selectedTool = nil
+
+	local ferramentasEncontradas = {}
+	for _, obj in pairs(game:GetDescendants()) do
+		if obj:IsA("Tool") and not ferramentasEncontradas[obj.Name] then
+			ferramentasEncontradas[obj.Name] = obj
+			
+			local btnTool = Instance.new("TextButton")
+			btnTool.Size = UDim2.new(0, 180, 0, 26)
+			btnTool.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+			btnTool.TextColor3 = Color3.fromRGB(255, 255, 255)
+			btnTool.Font = Enum.Font.Gotham
+			btnTool.TextSize = 12
+			btnTool.Text = obj.Name
+			btnTool.Parent = toolScrollList
+
+			local cornerBtn = Instance.new("UICorner")
+			cornerBtn.CornerRadius = UDim.new(0, 4)
+			cornerBtn.Parent = btnTool
+
+			btnTool.MouseButton1Click:Connect(function()
+				for _, other in pairs(toolScrollList:GetChildren()) do
+					if other:IsA("TextButton") then
+						other.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+						other.TextColor3 = Color3.fromRGB(255, 255, 255)
+					end
+				end
+				selectedTool = obj
+				btnTool.BackgroundColor3 = COR_ACENTO
+				btnTool.TextColor3 = Color3.fromRGB(0, 0, 0)
+			end)
+		end
+	end
+
+	toolScrollList.CanvasSize = UDim2.new(0, 0, 0, toolListLayout.AbsoluteContentSize.Y + 10)
+end
+
+-- Inicializa a lista de ferramentas
+task.spawn(atualizarListaFerramentas)
+
+getToolBtn.MouseButton1Click:Connect(function()
+	if selectedTool and player:FindFirstChildOfClass("Backpack") then
+		local clonedTool = selectedTool:Clone()
+		clonedTool.Parent = player:FindFirstChildOfClass("Backpack")
+	end
+end)
 
 -- Estados das Funções
 local speedAtivo, jumpAtivo, noclipAtivo = false, false, false
@@ -212,7 +287,7 @@ torsoSkyBtn.MouseButton1Click:Connect(function()
 	torsoSkyBtn.TextColor3 = torsoSkyAtivo and COR_ACENTO or Color3.fromRGB(255, 255, 255)
 end)
 
--- 4. TELEPORTE POR CAIXA DE TEXTO
+-- 5. TELEPORTE POR CAIXA DE TEXTO
 tpBtn.MouseButton1Click:Connect(function()
 	local text = string.lower(nameInput.Text)
 	if text == "" then return end
@@ -231,36 +306,6 @@ tpBtn.MouseButton1Click:Connect(function()
 				end
 				break
 			end
-		end
-	end
-end)
-
--- 5. FUNÇÃO PARA OBTER A FERRAMENTA F3X
-f3xBtn.MouseButton1Click:Connect(function()
-	local backpack = player:FindFirstChildOfClass("Backpack")
-	if backpack then
-		-- Carrega a ferramenta oficial F3X da biblioteca do Roblox (Asset ID: 142786007)
-		local success, result = pcall(function()
-			return InsertService:LoadAsset(142786007)
-		end)
-		
-		if success and result then
-			local tool = result:FindFirstChildOfClass("Tool")
-			if tool then
-				tool.Parent = backpack
-			else
-				for _, item in pairs(result:GetChildren()) do
-					item.Parent = backpack
-				end
-			end
-		else
-			-- Fallback alternativo via GetObjects caso LoadAsset falhe
-			pcall(function()
-				local objects = game:GetObjects("rbxassetid://142786007")
-				if objects and #objects > 0 then
-					objects[1].Parent = backpack
-				end
-			end)
 		end
 	end
 end)
