@@ -1,6 +1,6 @@
 --[[ 
-    LEMON TROLL 🍋 - Script para Roblox Studio
-    Menu Flutuante com ESP Tracers, Lista de Ferramentas, Torso Skybox e Teleporte
+    LEMON TROLL 🍋 - Script para Roblox Studio (Layout Horizontal)
+    Menu Flutuante com ESP Tracers, Lista Avançada de Ferramentas com Refresh, Torso Skybox e Teleporte
 ]]
 
 local Players = game:GetService("Players")
@@ -35,11 +35,11 @@ cornerOpen.CornerRadius = UDim.new(1, 0)
 cornerOpen.Parent = openButton
 openButton.Parent = screenGui
 
--- Menu Principal (Frame)
+-- Menu Principal Horizontal (Frame Deitado)
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 240, 0, 520)
-mainFrame.Position = UDim2.new(0.5, -120, 0.5, -260)
+mainFrame.Size = UDim2.new(0, 520, 0, 210) -- Dimensionado na horizontal
+mainFrame.Position = UDim2.new(0.5, -260, 0.5, -105)
 mainFrame.BackgroundColor3 = COR_FUNDO
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
@@ -49,13 +49,13 @@ local cornerMain = Instance.new("UICorner")
 cornerMain.CornerRadius = UDim.new(0, 10)
 cornerMain.Parent = mainFrame
 
--- Título
+-- Barra de Título Topo
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 40)
+title.Size = UDim2.new(1, 0, 0, 35)
 title.Text = "Lemon troll 🍋"
 title.TextColor3 = COR_ACENTO
 title.Font = Enum.Font.GothamBold
-title.TextSize = 18
+title.TextSize = 16
 title.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 title.Parent = mainFrame
 
@@ -65,8 +65,8 @@ cornerTitle.Parent = title
 
 -- Botão Fechar (X)
 local closeButton = Instance.new("TextButton")
-closeButton.Size = UDim2.new(0, 30, 0, 30)
-closeButton.Position = UDim2.new(1, -35, 0, 5)
+closeButton.Size = UDim2.new(0, 25, 0, 25)
+closeButton.Position = UDim2.new(1, -30, 0, 5)
 closeButton.Text = "X"
 closeButton.Font = Enum.Font.GothamBold
 closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -77,18 +77,48 @@ local cornerClose = Instance.new("UICorner")
 cornerClose.CornerRadius = UDim.new(0, 6)
 cornerClose.Parent = closeButton
 
--- Layout dos Botões Internos
-local container = Instance.new("Frame")
-container.Size = UDim2.new(1, 0, 1, -45)
-container.Position = UDim2.new(0, 0, 0, 45)
-container.BackgroundTransparency = 1
-container.Parent = mainFrame
+-- Layout de Colunas Horizontais
+local contentFrame = Instance.new("Frame")
+contentFrame.Size = UDim2.new(1, -20, 1, -45)
+contentFrame.Position = UDim2.new(0, 10, 0, 40)
+contentFrame.BackgroundTransparency = 1
+contentFrame.Parent = mainFrame
 
-local layout = Instance.new("UIListLayout")
-layout.Parent = container
-layout.Padding = UDim.new(0, 6)
-layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-layout.SortOrder = Enum.SortOrder.LayoutOrder
+local horizontalLayout = Instance.new("UIListLayout")
+horizontalLayout.Parent = contentFrame
+horizontalLayout.FillDirection = Enum.FillDirection.Horizontal
+horizontalLayout.Padding = UDim.new(0, 10)
+horizontalLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+-- Coluna 1: Controles de Jogador
+local col1 = Instance.new("Frame")
+col1.Size = UDim2.new(0, 155, 1, 0)
+col1.BackgroundTransparency = 1
+col1.Parent = contentFrame
+
+local layoutCol1 = Instance.new("UIListLayout")
+layoutCol1.Parent = col1
+layoutCol1.Padding = UDim.new(0, 5)
+
+-- Coluna 2: Teleporte e Visual
+local col2 = Instance.new("Frame")
+col2.Size = UDim2.new(0, 155, 1, 0)
+col2.BackgroundTransparency = 1
+col2.Parent = contentFrame
+
+local layoutCol2 = Instance.new("UIListLayout")
+layoutCol2.Parent = col2
+layoutCol2.Padding = UDim.new(0, 5)
+
+-- Coluna 3: Gerenciador de Ferramentas
+local col3 = Instance.new("Frame")
+col3.Size = UDim2.new(0, 160, 1, 0)
+col3.BackgroundTransparency = 1
+col3.Parent = contentFrame
+
+local layoutCol3 = Instance.new("UIListLayout")
+layoutCol3.Parent = col3
+layoutCol3.Padding = UDim.new(0, 5)
 
 -- 2. FUNÇÃO PARA ARRASTAR O MENU
 local dragging, dragInput, dragStart, startPos
@@ -120,7 +150,6 @@ UserInputService.InputChanged:Connect(function(input)
 	end
 end)
 
--- Abrir e Fechar Menu
 closeButton.MouseButton1Click:Connect(function()
 	mainFrame.Visible = false
 	openButton.Visible = true
@@ -131,56 +160,88 @@ openButton.MouseButton1Click:Connect(function()
 	openButton.Visible = false
 end)
 
--- 3. CRIAÇÃO DOS BOTÕES E ELEMENTOS
-local function criarBotao(texto, tamanhoY)
+-- 3. CRIAR BOTÕES
+local function criarBotao(texto, parentFrame, altura)
 	local btn = Instance.new("TextButton")
-	btn.Size = UDim2.new(0, 200, 0, tamanhoY or 35)
+	btn.Size = UDim2.new(1, 0, 0, altura or 32)
 	btn.BackgroundColor3 = COR_BOTAO
 	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	btn.TextSize = 13
+	btn.TextSize = 12
 	btn.Font = Enum.Font.Gotham
 	btn.Text = texto
-	btn.Parent = container
+	btn.Parent = parentFrame
 	
 	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 8)
+	corner.CornerRadius = UDim.new(0, 6)
 	corner.Parent = btn
 	return btn
 end
 
-local speedBtn = criarBotao("Speed: OFF")
-local jumpBtn = criarBotao("Jump: OFF")
-local noclipBtn = criarBotao("Noclip: OFF")
+-- Botões Coluna 1
+local speedBtn = criarBotao("Speed: OFF", col1)
+local jumpBtn = criarBotao("Jump: OFF", col1)
+local noclipBtn = criarBotao("Noclip: OFF", col1)
 
--- Caixa de Texto para Nome do Jogador
+-- Elementos Coluna 2
 local nameInput = Instance.new("TextBox")
-nameInput.Size = UDim2.new(0, 200, 0, 35)
+nameInput.Size = UDim2.new(1, 0, 0, 32)
 nameInput.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 nameInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-nameInput.PlaceholderText = "Nome do Jogador..."
+nameInput.PlaceholderText = "Nome Jogador..."
 nameInput.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
 nameInput.Font = Enum.Font.Gotham
-nameInput.TextSize = 13
+nameInput.TextSize = 12
 nameInput.Text = ""
-nameInput.Parent = container
+nameInput.Parent = col2
 
 local cornerInput = Instance.new("UICorner")
-cornerInput.CornerRadius = UDim.new(0, 8)
+cornerInput.CornerRadius = UDim.new(0, 6)
 cornerInput.Parent = nameInput
 
-local tpBtn = criarBotao("⚡ Teleport to Player", 35)
+local tpBtn = criarBotao("⚡ Teleport", col2, 32)
 tpBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
 
--- 4. LISTA DE FERRAMENTAS DO JOGO
+local espBtn = criarBotao("ESP Tracers: OFF", col2)
+local torsoSkyBtn = criarBotao("Torso Skybox: OFF", col2)
+
+-- Elementos Coluna 3 (Lista de Ferramentas)
 local selectedTool = nil
 
+local toolHeader = Instance.new("Frame")
+toolHeader.Size = UDim2.new(1, 0, 0, 25)
+toolHeader.BackgroundTransparency = 1
+toolHeader.Parent = col3
+
+local toolTitle = Instance.new("TextLabel")
+toolTitle.Size = UDim2.new(0.7, 0, 1, 0)
+toolTitle.Text = " Ferramentas"
+toolTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+toolTitle.Font = Enum.Font.GothamBold
+toolTitle.TextSize = 11
+toolTitle.TextXAlignment = Enum.TextXAlignment.Left
+toolTitle.BackgroundTransparency = 1
+toolTitle.Parent = toolHeader
+
+local refreshBtn = Instance.new("TextButton")
+refreshBtn.Size = UDim2.new(0.3, 0, 1, 0)
+refreshBtn.Text = "🔄"
+refreshBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+refreshBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+refreshBtn.Font = Enum.Font.GothamBold
+refreshBtn.TextSize = 12
+refreshBtn.Parent = toolHeader
+
+local cornerRefresh = Instance.new("UICorner")
+cornerRefresh.CornerRadius = UDim.new(0, 4)
+cornerRefresh.Parent = refreshBtn
+
 local toolScrollList = Instance.new("ScrollingFrame")
-toolScrollList.Size = UDim2.new(0, 200, 0, 100)
+toolScrollList.Size = UDim2.new(1, 0, 0, 95)
 toolScrollList.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 toolScrollList.BorderSizePixel = 0
 toolScrollList.CanvasSize = UDim2.new(0, 0, 0, 0)
 toolScrollList.ScrollBarThickness = 4
-toolScrollList.Parent = container
+toolScrollList.Parent = col3
 
 local cornerToolScroll = Instance.new("UICorner")
 cornerToolScroll.CornerRadius = UDim.new(0, 6)
@@ -188,18 +249,15 @@ cornerToolScroll.Parent = toolScrollList
 
 local toolListLayout = Instance.new("UIListLayout")
 toolListLayout.Parent = toolScrollList
-toolListLayout.Padding = UDim.new(0, 4)
+toolListLayout.Padding = UDim.new(0, 3)
 toolListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 toolListLayout.SortOrder = Enum.SortOrder.Name
 
-local getToolBtn = criarBotao("🎒 Get Selected Tool", 32)
+local getToolBtn = criarBotao("🎒 Pegar Item", col3, 30)
 getToolBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 75)
 
-local espBtn = criarBotao("ESP Tracers: OFF")
-local torsoSkyBtn = criarBotao("Torso Skybox: OFF")
-
--- Atualizar lista de ferramentas disponíveis
-local function atualizarListaFerramentas()
+-- 4. LÓGICA DE BUSCA DE FERRAMENTAS & REFRESH
+local function buscarTodasFerramentas()
 	for _, child in pairs(toolScrollList:GetChildren()) do
 		if child:IsA("TextButton") then
 			child:Destroy()
@@ -207,44 +265,59 @@ local function atualizarListaFerramentas()
 	end
 	
 	selectedTool = nil
-
 	local ferramentasEncontradas = {}
-	for _, obj in pairs(game:GetDescendants()) do
-		if obj:IsA("Tool") and not ferramentasEncontradas[obj.Name] then
-			ferramentasEncontradas[obj.Name] = obj
-			
-			local btnTool = Instance.new("TextButton")
-			btnTool.Size = UDim2.new(0, 180, 0, 26)
-			btnTool.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-			btnTool.TextColor3 = Color3.fromRGB(255, 255, 255)
-			btnTool.Font = Enum.Font.Gotham
-			btnTool.TextSize = 12
-			btnTool.Text = obj.Name
-			btnTool.Parent = toolScrollList
 
-			local cornerBtn = Instance.new("UICorner")
-			cornerBtn.CornerRadius = UDim.new(0, 4)
-			cornerBtn.Parent = btnTool
+	-- Varredura no Workspace, ReplicatedStorage, Lighting e mochilas de jogadores
+	local locais = {
+		game:GetService("Workspace"),
+		game:GetService("ReplicatedStorage"),
+		game:GetService("Lighting"),
+		game:GetService("StarterPack")
+	}
 
-			btnTool.MouseButton1Click:Connect(function()
-				for _, other in pairs(toolScrollList:GetChildren()) do
-					if other:IsA("TextButton") then
-						other.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-						other.TextColor3 = Color3.fromRGB(255, 255, 255)
-					end
+	for _, localBusca in pairs(locais) do
+		pcall(function()
+			for _, obj in pairs(localBusca:GetDescendants()) do
+				if obj:IsA("Tool") and not ferramentasEncontradas[obj.Name] then
+					ferramentasEncontradas[obj.Name] = obj
 				end
-				selectedTool = obj
-				btnTool.BackgroundColor3 = COR_ACENTO
-				btnTool.TextColor3 = Color3.fromRGB(0, 0, 0)
-			end)
-		end
+			end
+		end)
+	end
+
+	-- Gera os botões para cada ferramenta localizada
+	for name, obj in pairs(ferramentasEncontradas) do
+		local btnTool = Instance.new("TextButton")
+		btnTool.Size = UDim2.new(0.92, 0, 0, 24)
+		btnTool.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+		btnTool.TextColor3 = Color3.fromRGB(255, 255, 255)
+		btnTool.Font = Enum.Font.Gotham
+		btnTool.TextSize = 11
+		btnTool.Text = name
+		btnTool.Parent = toolScrollList
+
+		local cornerBtn = Instance.new("UICorner")
+		cornerBtn.CornerRadius = UDim.new(0, 4)
+		cornerBtn.Parent = btnTool
+
+		btnTool.MouseButton1Click:Connect(function()
+			for _, other in pairs(toolScrollList:GetChildren()) do
+				if other:IsA("TextButton") then
+					other.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+					other.TextColor3 = Color3.fromRGB(255, 255, 255)
+				end
+			end
+			selectedTool = obj
+			btnTool.BackgroundColor3 = COR_ACENTO
+			btnTool.TextColor3 = Color3.fromRGB(0, 0, 0)
+		end)
 	end
 
 	toolScrollList.CanvasSize = UDim2.new(0, 0, 0, toolListLayout.AbsoluteContentSize.Y + 10)
 end
 
--- Inicializa a lista de ferramentas
-task.spawn(atualizarListaFerramentas)
+refreshBtn.MouseButton1Click:Connect(buscarTodasFerramentas)
+task.spawn(buscarTodasFerramentas)
 
 getToolBtn.MouseButton1Click:Connect(function()
 	if selectedTool and player:FindFirstChildOfClass("Backpack") then
@@ -287,7 +360,7 @@ torsoSkyBtn.MouseButton1Click:Connect(function()
 	torsoSkyBtn.TextColor3 = torsoSkyAtivo and COR_ACENTO or Color3.fromRGB(255, 255, 255)
 end)
 
--- 5. TELEPORTE POR CAIXA DE TEXTO
+-- 5. TELEPORTE POR TEXTO
 tpBtn.MouseButton1Click:Connect(function()
 	local text = string.lower(nameInput.Text)
 	if text == "" then return end
@@ -355,7 +428,7 @@ RunService.RenderStepped:Connect(function()
 					table.insert(highlights, hl)
 				end
 				
-				-- Nome DisplayName acima da cabeça
+				-- Nome DisplayName
 				if head and not head:FindFirstChild("LemonNameGui") then
 					local bbGui = Instance.new("BillboardGui")
 					bbGui.Name = "LemonNameGui"
