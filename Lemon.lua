@@ -407,7 +407,7 @@ RunService.RenderStepped:Connect(function()
 	-- Speed
 	if char then
 		local hum = char:FindFirstChildOfClass("Humanoid")
-		if hum then hum.WalkSpeed = speedAtivo and 100 or 16 end
+		if hum then hum.WalkSpeed = speedAtivo and 250 or 16 end
 	end
 	
 	-- ESP, Tracers & Nomes
